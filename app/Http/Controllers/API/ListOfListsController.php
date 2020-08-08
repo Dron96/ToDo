@@ -39,7 +39,8 @@ class ListOfListsController extends BaseController
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
         ]);
-        if($validator->fails()){
+
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = ListOfLists::create($input);
@@ -80,7 +81,7 @@ class ListOfListsController extends BaseController
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item->name = $input['name'];

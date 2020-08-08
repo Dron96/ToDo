@@ -39,7 +39,7 @@ class TodoListController extends BaseController
             'name' => 'required|min:5|max:255',
             'list_id' => 'required|integer|exists:list_of_lists,id',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = TodoList::create($input);
@@ -55,7 +55,7 @@ class TodoListController extends BaseController
     public function show($id)
     {
         $item = TodoItem::all()->where('list_id', $id);
-        if(is_null($item)) {
+        if (is_null($item)) {
             return $this->sendError('Список не найден', 404);
         }
         return $this->sendResponse($item->toArray(), 'Список получен');
@@ -73,7 +73,7 @@ class TodoListController extends BaseController
     {
         $item = TodoList::find($id);
 
-        if(empty($item)) {
+        if (empty($item)) {
             return $this->sendError("Запись id=[{$id}] не найдена");
         }
 
@@ -82,7 +82,7 @@ class TodoListController extends BaseController
             'name' => 'required|min:5|max:255',
             'list_id' => 'required|integer|exists:list_of_lists,id',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item->name = $input['name'];
@@ -101,7 +101,7 @@ class TodoListController extends BaseController
     {
         $item = TodoList::find($id);
 
-        if(empty($item)) {
+        if (empty($item)) {
             return $this->sendError("Запись id=[{$id}] не найдена");
         }
 

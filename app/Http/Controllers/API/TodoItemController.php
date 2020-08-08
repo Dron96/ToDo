@@ -45,7 +45,7 @@ class TodoItemController extends BaseController
 
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = TodoItem::create($input);
@@ -61,7 +61,7 @@ class TodoItemController extends BaseController
     public function show($id)
     {
         $item = TodoItem::find($id);
-        if(is_null($item)) {
+        if (is_null($item)) {
             return $this->sendError('Список не найден', 404);
         }
         return $this->sendResponse($item->toArray(), 'Задача получена');
@@ -80,7 +80,7 @@ class TodoItemController extends BaseController
     {
         $item = TodoItem::find($id);
 
-        if(empty($item)) {
+        if (empty($item)) {
             return $this->sendError("Запись id=[{$id}] не найдена");
         }
 
@@ -92,7 +92,7 @@ class TodoItemController extends BaseController
             'list_id' => 'required|integer|exists:todo_lists,id',
             'description' => 'string|max:3000|min:10',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()){
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item->name = $input['name'];
@@ -114,7 +114,7 @@ class TodoItemController extends BaseController
     {
         $item = TodoItem::find($id);
 
-        if(empty($item)) {
+        if (empty($item)) {
             return $this->sendError("Запись id=[{$id}] не найдена");
         }
 
