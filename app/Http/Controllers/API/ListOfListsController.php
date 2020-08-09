@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ListOfListsRequest;
-use App\Http\Requests\TodoListCreateRequest;
 use App\Models\ListOfLists;
 use App\Models\TodoItem;
 use App\Models\TodoList;
