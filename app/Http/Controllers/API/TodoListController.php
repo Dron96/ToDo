@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Requests\TodoListCreateRequest;
-use App\Http\Requests\TodoListUpdateRequest;
-use App\Models\ListOfLists;
 use App\Models\TodoItem;
 use App\Models\TodoList;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,7 +14,7 @@ class TodoListController extends BaseController
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index()
     {
@@ -28,8 +27,8 @@ class TodoListController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -39,7 +38,7 @@ class TodoListController extends BaseController
             'name' => 'required|min:5|max:255',
             'list_id' => 'required|integer|exists:list_of_lists,id',
         ]);
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = TodoList::create($input);
@@ -50,7 +49,7 @@ class TodoListController extends BaseController
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show($id)
     {
@@ -65,9 +64,9 @@ class TodoListController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -82,7 +81,7 @@ class TodoListController extends BaseController
             'name' => 'required|min:5|max:255',
             'list_id' => 'required|integer|exists:list_of_lists,id',
         ]);
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item->name = $input['name'];
@@ -94,8 +93,9 @@ class TodoListController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $id
+     * @return JsonResponse
+     * @throws Exception
      */
     public function destroy($id)
     {

@@ -2,9 +2,22 @@
 
 namespace App\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * App\Models\TodoList
+ *
+ * @property int $id
+ * @property string $name
+ * @property int $list_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @mixin Eloquent
+ */
 class TodoList extends Model
 {
     use SoftDeletes;
