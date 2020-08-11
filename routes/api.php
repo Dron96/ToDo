@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Middleware\CheckListOfLists;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,7 +18,13 @@ use Illuminate\Support\Facades\Route;
 //    return $request->user();
 //});
 
-Route::apiResource('/', 'API\ListOfListsController');
+
+Route::apiResource('/lists', 'API\ListOfListsController');
 Route::apiResource('/list', 'API\TodoListController');
 Route::apiResource('/item', 'API\TodoItemController');
+
+Route::group(['middleware' => 'isId'], function() {
+    Route::get('/lists/{list}', 'API\ListOfListsController@show')->name('lists.show');
+});
+
 
