@@ -5,7 +5,7 @@
 2. Laravel 7.21
 3. PostgreSQL 12.3
 
-###Как начать:
+### Как начать:
 1. Установка PHP 7.4: <br>
 ```
 sudo apt install php7.4
