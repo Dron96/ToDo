@@ -27,4 +27,15 @@ class TodoList extends Model
             'name',
             'list_id'
         ];
+
+    public function list()
+    {
+        return $this->belongsTo(ListOfLists::class, 'list_id', 'id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany('App\Models\TodoItem', 'list_id', 'id');
+    }
+
 }

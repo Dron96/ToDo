@@ -49,16 +49,13 @@ class ListOfListsController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param ListOfLists $list
      * @return JsonResponse
      */
-    public function show($id)
+    public function show(ListOfLists $list)
     {
-        $item = TodoList::all()->where('list_id', $id);
-        if (is_null($item)) {
-            return $this->sendError('Список списков не найден', 404);
-        }
-        return $this->sendResponse($item->toArray(), 'Список списков получен');
+        $lists = $list->todoLists()->get();
+        return $this->sendResponse($lists->toArray(), 'Список списков получен');
     }
 
 
@@ -66,17 +63,11 @@ class ListOfListsController extends BaseController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  int  $id
+     * @param ListOfLists $list
      * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, ListOfLists $list)
     {
-        $item = ListOfLists::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -84,38 +75,30 @@ class ListOfListsController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
-        $item->name = $input['name'];
-        $item->save();
-        return $this->sendResponse($item->toArray(), 'Список списков успешно обновлен');
+        $list->name = $input['name'];
+        $list->save();
+        return $this->sendResponse($list->toArray(), 'Список списков успешно обновлен');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param ListOfLists $list
      * @return JsonResponse
      * @throws Exception
      */
-    public function destroy($id)
+    public function destroy(ListOfLists $list)
     {
-        $item = ListOfLists::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
-        $todoLists = TodoList::all()->where('list_id', '=', "{$item->id}");
-
+        $todoLists = $list->todoLists()->get();
         foreach ($todoLists as $todoList) {
-            $todoItems = TodoItem::all()->where('list_id', '=', "{$todoList->id}");
-
+            $todoItems = $todoList->items()->get();
             foreach ($todoItems as $todoItem) {
                 $todoItem->delete();
             }
             $todoList->delete();
         }
-        $item->delete();
+        $list->delete();
 
-        return $this->sendResponse($item->toArray(), 'Список списков успешно удален');
+        return $this->sendResponse($list->toArray(), 'Список списков успешно удален');
     }
 }

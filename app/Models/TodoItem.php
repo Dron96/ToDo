@@ -33,4 +33,9 @@ class TodoItem extends Model
             'description',
             'urgency'
         ];
+
+    public function list()
+    {
+        return $this->belongsTo('App\Models\TodoList', 'list_id', 'id');
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\TodoItem;
 use App\Models\TodoList;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -48,16 +47,13 @@ class TodoListController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param TodoList $list
      * @return JsonResponse
      */
-    public function show($id)
+    public function show(TodoList $list)
     {
-        $item = TodoItem::all()->where('list_id', $id);
-        if (is_null($item)) {
-            return $this->sendError('Список не найден', 404);
-        }
-        return $this->sendResponse($item->toArray(), 'Список получен');
+        $items = $list->items()->get();
+        return $this->sendResponse($items, 'Список получен');
     }
 
 
@@ -65,17 +61,11 @@ class TodoListController extends BaseController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param  int  $id
+     * @param TodoList $list
      * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, TodoList $list)
     {
-        $item = TodoList::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -84,34 +74,28 @@ class TodoListController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
-        $item->name = $input['name'];
-        $item->list_id = $input['list_id'];
-        $item->save();
-        return $this->sendResponse($item->toArray(), 'Список успешно обновлен');
+        $list->name = $input['name'];
+        $list->list_id = $input['list_id'];
+        $list->save();
+        return $this->sendResponse($list->toArray(), 'Список успешно обновлен');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param TodoList $list
      * @return JsonResponse
      * @throws Exception
      */
-    public function destroy($id)
+    public function destroy(TodoList $list)
     {
-        $item = TodoList::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
-        $todoItems = TodoItem::all()->where('list_id', '=', "{$item->id}");
+        $todoItems = $list->items()->get();
         foreach ($todoItems as $todoItem) {
             $todoItem->delete();
         }
 
-        $item->delete();
+        $list->delete();
 
-        return $this->sendResponse($item->toArray(), 'Список успешно удален');
+        return $this->sendResponse($list->toArray(), 'Список успешно удален');
     }
 }

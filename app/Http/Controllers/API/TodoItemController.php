@@ -52,15 +52,11 @@ class TodoItemController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param TodoItem $item
      * @return JsonResponse
      */
-    public function show($id)
+    public function show(TodoItem $item)
     {
-        $item = TodoItem::find($id);
-        if (is_null($item)) {
-            return $this->sendError('Список не найден', 404);
-        }
         return $this->sendResponse($item->toArray(), 'Задача получена');
     }
 
@@ -69,17 +65,11 @@ class TodoItemController extends BaseController
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param int $id
+     * @param TodoItem $item
      * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, TodoItem $item)
     {
-        $item = TodoItem::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -102,20 +92,13 @@ class TodoItemController extends BaseController
 
     /**
      * Remove the specified resource from storage.
-     * @param $id
+     * @param TodoItem $item
      * @return JsonResponse
      * @throws Exception
      */
-    public function destroy($id)
+    public function destroy(TodoItem $item)
     {
-        $item = TodoItem::find($id);
-
-        if (empty($item)) {
-            return $this->sendError("Запись id=[{$id}] не найдена");
-        }
-
         $item->delete();
-
         return $this->sendResponse($item->toArray(), 'Список успешно удален');
     }
 }

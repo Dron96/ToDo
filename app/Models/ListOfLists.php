@@ -27,4 +27,9 @@ class ListOfLists extends Model
         = [
             'name',
         ];
+
+    public function todoLists()
+    {
+        return $this->hasMany(TodoList::class, 'list_id', 'id');
+    }
 }
