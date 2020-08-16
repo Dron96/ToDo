@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\ListOfLists;
-use App\Models\TodoItem;
-use App\Models\TodoList;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,6 +41,7 @@ class ListOfListsController extends BaseController
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = ListOfLists::create($input);
+
         return $this->sendResponse($item->toArray(), 'Список списков успешно создан');
     }
 
@@ -54,7 +53,8 @@ class ListOfListsController extends BaseController
      */
     public function show(ListOfLists $list)
     {
-        $lists = $list->todoLists()->get();
+        $lists = $list->todoLists;
+
         return $this->sendResponse($lists->toArray(), 'Список списков получен');
     }
 
@@ -77,6 +77,7 @@ class ListOfListsController extends BaseController
         }
         $list->name = $input['name'];
         $list->save();
+
         return $this->sendResponse($list->toArray(), 'Список списков успешно обновлен');
     }
 

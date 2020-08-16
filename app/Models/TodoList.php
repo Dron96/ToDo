@@ -16,6 +16,10 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
+ * @property ListOfLists $list
+ * @property TodoItem $items
+ *
  * @mixin Eloquent
  */
 class TodoList extends Model
@@ -35,7 +39,7 @@ class TodoList extends Model
 
     public function items()
     {
-        return $this->hasMany('App\Models\TodoItem', 'list_id', 'id');
+        return $this->hasMany(TodoItem::class, 'list_id', 'id');
     }
 
 }

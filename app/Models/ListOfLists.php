@@ -6,6 +6,7 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Ramsey\Collection\Collection;
 
 /**
  * Class ListOfLists
@@ -17,13 +18,15 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
+ * @property array|Collection|TodoList $todoLists
  */
-
 class ListOfLists extends Model
 {
     use SoftDeletes;
 
-    protected $fillable //говорит для fill в Controller какие поля можно перезаписывать
+    //говорит для fill в Controller какие поля можно перезаписывать
+    protected $fillable
         = [
             'name',
         ];

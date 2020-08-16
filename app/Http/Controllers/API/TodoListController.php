@@ -41,6 +41,7 @@ class TodoListController extends BaseController
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = TodoList::create($input);
+
         return $this->sendResponse($item->toArray(), 'Список успешно создан');
     }
 
@@ -52,7 +53,8 @@ class TodoListController extends BaseController
      */
     public function show(TodoList $list)
     {
-        $items = $list->items()->get();
+        $items = $list->items;
+
         return $this->sendResponse($items, 'Список получен');
     }
 
@@ -77,6 +79,7 @@ class TodoListController extends BaseController
         $list->name = $input['name'];
         $list->list_id = $input['list_id'];
         $list->save();
+
         return $this->sendResponse($list->toArray(), 'Список успешно обновлен');
     }
 

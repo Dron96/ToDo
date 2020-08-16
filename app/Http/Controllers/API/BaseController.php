@@ -21,6 +21,7 @@ abstract class BaseController extends Controller
             'data'    => $result,
             'message' => $message,
         ];
+
         return response()->json($response, 200);
     }
 
@@ -41,6 +42,7 @@ abstract class BaseController extends Controller
         if (!empty($errorMessages)) {
             $response['data'] = $errorMessages;
         }
+
         return response()->json($response, $code);
     }
 }

@@ -46,6 +46,7 @@ class TodoItemController extends BaseController
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $item = TodoItem::create($input);
+
         return $this->sendResponse($item->toArray(), 'Задача создана');
     }
 
@@ -87,6 +88,7 @@ class TodoItemController extends BaseController
         $item->list_id = $input['list_id'];
         $item->description = $input['description'];
         $item->save();
+
         return $this->sendResponse($item->toArray(), 'Задача успешно обновлена');
     }
 
@@ -99,6 +101,7 @@ class TodoItemController extends BaseController
     public function destroy(TodoItem $item)
     {
         $item->delete();
+
         return $this->sendResponse($item->toArray(), 'Список успешно удален');
     }
 }
