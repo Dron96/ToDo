@@ -17,9 +17,11 @@ class ListOfListsTableSeeder extends Seeder
 
         for ($i = 1; $i <= 3; $i++){
             $name = 'Список №'.$i;
+            $user_id = rand(1, 3);
             $created_at = $faker->dateTimeBetween('-3 monts','-10 day');
 
             $lists[] = ['name' => $name,
+                'user_id' => $user_id,
                 'created_at' => $created_at,
                 'updated_at' => $created_at,
                 ];

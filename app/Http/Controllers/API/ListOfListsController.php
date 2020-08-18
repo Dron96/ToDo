@@ -6,6 +6,7 @@ use App\Models\ListOfLists;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use \Illuminate\Support\Facades\Validator;
 
 class ListOfListsController extends BaseController
@@ -17,9 +18,9 @@ class ListOfListsController extends BaseController
      */
     public function index()
     {
-        $items = ListOfLists::all();
+        $items = ListOfLists::where('user_id', '=', Auth::id())->get();
 
-        return $this->sendResponse($items->toArray(), 'Списки списков получены');
+        return $this->sendResponse($items, 'Списки списков получены');
     }
 
 
@@ -32,9 +33,11 @@ class ListOfListsController extends BaseController
     public function store(Request $request)
     {
         $input = $request->all();
+        $input['user_id'] = Auth::id();
 
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
+            'user_id' => 'required|integer|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -49,13 +52,17 @@ class ListOfListsController extends BaseController
      * Display the specified resource.
      *
      * @param ListOfLists $list
+     *
      * @return JsonResponse
      */
     public function show(ListOfLists $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
         $lists = $list->todoLists;
 
-        return $this->sendResponse($lists->toArray(), 'Список списков получен');
+        return $this->sendResponse(['list' => $lists->toArray()], 'Список списков получен');
     }
 
 
@@ -68,6 +75,10 @@ class ListOfListsController extends BaseController
      */
     public function update(Request $request, ListOfLists $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
+
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -90,6 +101,10 @@ class ListOfListsController extends BaseController
      */
     public function destroy(ListOfLists $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
+
         $todoLists = $list->todoLists()->get();
         foreach ($todoLists as $todoList) {
             $todoItems = $todoList->items()->get();

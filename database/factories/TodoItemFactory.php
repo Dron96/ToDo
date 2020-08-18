@@ -1,12 +1,13 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+/** @var Factory $factory */
 
 use App\Models\TodoItem;
 use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factory;
 
 $factory->define(TodoItem::class, function (Faker $faker) {
-//    $name = $faker->text(rand(3, 15));
+    $name = $faker->realText(rand(20,255));
     $description = $faker->realText(rand(500, 1500));
     $isComplete = rand(1, 5) > 3;
     $urgency = rand(1, 5);
@@ -16,7 +17,7 @@ $factory->define(TodoItem::class, function (Faker $faker) {
 
 
     return [
-        'name' => $faker->realText(rand(20,255)),
+        'name' => $name,
         'description' => $description,
         'complete' => $isComplete,
         'urgency' => $urgency,

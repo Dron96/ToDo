@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\TodoItem;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,9 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UserSeeder::class);
+        for($i = 1; $i < 3; $i++) {
+            $user = factory(User::class)->create();
+            $user->createToken('authToken')->accessToken;
+        }
+
         $this->call(ListOfListsTableSeeder::class);
         $this->call(TodoListSeeder::class);
-        factory(\App\Models\TodoItem::class, 45)->create();
+        factory(TodoItem::class, 45)->create();
     }
 }

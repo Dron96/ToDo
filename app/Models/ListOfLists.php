@@ -6,6 +6,7 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Ramsey\Collection\Collection;
 
 /**
@@ -29,10 +30,21 @@ class ListOfLists extends Model
     protected $fillable
         = [
             'name',
+            'user_id',
         ];
 
     public function todoLists()
     {
         return $this->hasMany(TodoList::class, 'list_id', 'id');
+    }
+
+    public function isOwn()
+    {
+        if ($this->user_id === Auth::id()) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
