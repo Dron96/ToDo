@@ -20,6 +20,7 @@ use Ramsey\Collection\Collection;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
+ * @property int $user_id
  * @property array|Collection|TodoList $todoLists
  */
 class ListOfLists extends Model

@@ -17,7 +17,8 @@ class TodoItemController extends BaseController
      */
     public function index()
     {
-        $items = TodoItem::all();
+
+        $items = TodoItem::whereIn('list_id', (new TodoItem())->getListIds())->get();
 
         return $this->sendResponse($items->toArray(), 'Задачи получены');
     }
@@ -32,6 +33,10 @@ class TodoItemController extends BaseController
     public function store(Request $request)
     {
         $input = $request->all();
+
+        if (!in_array($input['list_id'], (new TodoItem())->getListIds())) {
+            return $this->sendError('Список с id не принадлежит пользователю');
+        }
 
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -58,6 +63,10 @@ class TodoItemController extends BaseController
      */
     public function show(TodoItem $item)
     {
+        if (!$item->isOwn()) {
+            return $this->sendError('Задача не принадлежит данному пользователю');
+        }
+
         return $this->sendResponse($item->toArray(), 'Задача получена');
     }
 
@@ -71,6 +80,10 @@ class TodoItemController extends BaseController
      */
     public function update(Request $request, TodoItem $item)
     {
+        if (!$item->isOwn()) {
+            return $this->sendError('Задача не принадлежит данному пользователю');
+        }
+
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -82,6 +95,11 @@ class TodoItemController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
+
+        if (!in_array($input['list_id'], (new TodoItem())->getListIds())) {
+            return $this->sendError('Список с id не принадлежит пользователю');
+        }
+
         $item->name = $input['name'];
         $item->complete = $input['complete'];
         $item->urgency = $input['urgency'];
@@ -100,6 +118,10 @@ class TodoItemController extends BaseController
      */
     public function destroy(TodoItem $item)
     {
+        if (!$item->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
+
         $item->delete();
 
         return $this->sendResponse($item->toArray(), 'Список успешно удален');

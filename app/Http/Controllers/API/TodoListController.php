@@ -17,7 +17,7 @@ class TodoListController extends BaseController
      */
     public function index()
     {
-        $items = TodoList::all();
+        $items = TodoList::whereIn('list_id', (new TodoList)->getListOfListsIds())->get();
 
         return $this->sendResponse($items->toArray(), 'Списки получены');
     }
@@ -32,6 +32,10 @@ class TodoListController extends BaseController
     public function store(Request $request)
     {
         $input = $request->all();
+
+        if (!in_array($input['list_id'], (new TodoList)->getListOfListsIds())) {
+            return $this->sendError('Список с id не принадлежит пользователю');
+        }
 
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -53,6 +57,9 @@ class TodoListController extends BaseController
      */
     public function show(TodoList $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
         $items = $list->items;
 
         return $this->sendResponse($items, 'Список получен');
@@ -68,6 +75,10 @@ class TodoListController extends BaseController
      */
     public function update(Request $request, TodoList $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
+
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -77,6 +88,9 @@ class TodoListController extends BaseController
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
         $list->name = $input['name'];
+        if (!in_array($input['list_id'], (new TodoList)->getListOfListsIds())) {
+            return $this->sendError('Список с id не принадлежит пользователю');
+        }
         $list->list_id = $input['list_id'];
         $list->save();
 
@@ -92,6 +106,10 @@ class TodoListController extends BaseController
      */
     public function destroy(TodoList $list)
     {
+        if (!$list->isOwn()) {
+            return $this->sendError('Список не принадлежит данному пользователю');
+        }
+
         $todoItems = $list->items()->get();
         foreach ($todoItems as $todoItem) {
             $todoItem->delete();
