@@ -27,10 +27,8 @@ class AuthController extends Controller
             'password' => 'required|confirmed',
         ]);
 
-        $validatedData['password'] = bcrypt($request->password);
-
+        $validatedData['password'] = bcrypt($request->get('password'));
         $user = User::create($validatedData);
-
         $accessToken = $user->createToken('authToken')->accessToken;
 
         return response(['user' => $user, 'access_token' => $accessToken]);
@@ -50,7 +48,6 @@ class AuthController extends Controller
         if(!auth()->attempt($loginData)) {
             return response(['message' => 'Invalid credentials']);
         }
-
         $accessToken = auth()->user()->createToken('authToken')->accessToken;
 
         return response(['user' => auth()->user(), 'access_token' => $accessToken]);

@@ -6,7 +6,6 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * App\Models\TodoList
@@ -43,21 +42,16 @@ class TodoList extends Model
         return $this->hasMany(TodoItem::class, 'list_id', 'id');
     }
 
-    public function isOwn()
+    public function isOwn($user_id)
     {
-        if ($this->list->user_id === Auth::id()) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return ($this->list->user_id === $user_id);
     }
 
-    public function getListOfListsIds()
+    public static function getListOfListsIds($user_id)
     {
         $ids = array();
 
-        $lists = ListOfLists::where('user_id', '=', Auth::id())->get();
+        $lists = ListOfLists::where('user_id', '=', $user_id)->get();
         foreach ($lists as $list) {
             $ids[] = $list->id;
         }

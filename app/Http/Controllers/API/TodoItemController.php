@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\TodoItem;
+use Auth;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +19,8 @@ class TodoItemController extends BaseController
      */
     public function index()
     {
-
-        $items = TodoItem::whereIn('list_id', (new TodoItem())->getListIds())->get();
+        $TodoLists = TodoItem::getListIds(Auth::id());
+        $items = TodoItem::whereIn('list_id', $TodoLists)->get();
 
         return $this->sendResponse($items->toArray(), 'Задачи получены');
     }
@@ -29,28 +31,26 @@ class TodoItemController extends BaseController
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function store(Request $request)
     {
         $input = $request->all();
-
-        if (!in_array($input['list_id'], (new TodoItem())->getListIds())) {
-            return $this->sendError('Список с id не принадлежит пользователю');
-        }
-
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
             'complete' => 'integer|max:0',
             'urgency' => 'required|integer|max:5',
             'list_id' => 'required|integer|exists:todo_lists,id',
             'description' => 'string|max:3000|min:10',
-
         ]);
 
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
-        $item = TodoItem::create($input);
+        $item = new TodoItem();
+        $item->fill($input);
+        $this->authorize('create', $item);
+        $item->save();
 
         return $this->sendResponse($item->toArray(), 'Задача создана');
     }
@@ -60,12 +60,11 @@ class TodoItemController extends BaseController
      *
      * @param TodoItem $item
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function show(TodoItem $item)
     {
-        if (!$item->isOwn()) {
-            return $this->sendError('Задача не принадлежит данному пользователю');
-        }
+        $this->authorize('view', $item);
 
         return $this->sendResponse($item->toArray(), 'Задача получена');
     }
@@ -77,13 +76,10 @@ class TodoItemController extends BaseController
      * @param Request $request
      * @param TodoItem $item
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function update(Request $request, TodoItem $item)
     {
-        if (!$item->isOwn()) {
-            return $this->sendError('Задача не принадлежит данному пользователю');
-        }
-
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -96,15 +92,14 @@ class TodoItemController extends BaseController
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
 
-        if (!in_array($input['list_id'], (new TodoItem())->getListIds())) {
-            return $this->sendError('Список с id не принадлежит пользователю');
-        }
-
-        $item->name = $input['name'];
-        $item->complete = $input['complete'];
-        $item->urgency = $input['urgency'];
-        $item->list_id = $input['list_id'];
-        $item->description = $input['description'];
+        $item->fill([
+            'name' => $input['name'],
+            'complete' => $input['complete'],
+            'urgency' => $input['urgency'],
+            'list_id' => $input['list_id'],
+            'description' => $input['description'],
+        ]);
+        $this->authorize('update', $item);
         $item->save();
 
         return $this->sendResponse($item->toArray(), 'Задача успешно обновлена');
@@ -118,10 +113,7 @@ class TodoItemController extends BaseController
      */
     public function destroy(TodoItem $item)
     {
-        if (!$item->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
-
+        $this->authorize('delete', $item);
         $item->delete();
 
         return $this->sendResponse($item->toArray(), 'Список успешно удален');

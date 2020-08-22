@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Models\TodoList;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class TodoListController extends BaseController
@@ -17,7 +19,8 @@ class TodoListController extends BaseController
      */
     public function index()
     {
-        $items = TodoList::whereIn('list_id', (new TodoList)->getListOfListsIds())->get();
+        $todoListIds = TodoList::getListOfListsIds(Auth::id());
+        $items = TodoList::whereIn('list_id', $todoListIds)->get();
 
         return $this->sendResponse($items->toArray(), 'Списки получены');
     }
@@ -28,15 +31,11 @@ class TodoListController extends BaseController
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function store(Request $request)
     {
         $input = $request->all();
-
-        if (!in_array($input['list_id'], (new TodoList)->getListOfListsIds())) {
-            return $this->sendError('Список с id не принадлежит пользователю');
-        }
-
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
             'list_id' => 'required|integer|exists:list_of_lists,id',
@@ -44,7 +43,13 @@ class TodoListController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
-        $item = TodoList::create($input);
+        $item = new TodoList();
+        $item->fill([
+            'name' => $input['name'],
+            'list_id' => $input['list_id'],
+        ]);
+        $this->authorize('create', $item);
+        $item->save();
 
         return $this->sendResponse($item->toArray(), 'Список успешно создан');
     }
@@ -54,12 +59,11 @@ class TodoListController extends BaseController
      *
      * @param TodoList $list
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function show(TodoList $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
+        $this->authorize('view', $list);
         $items = $list->items;
 
         return $this->sendResponse($items, 'Список получен');
@@ -72,13 +76,10 @@ class TodoListController extends BaseController
      * @param Request $request
      * @param TodoList $list
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function update(Request $request, TodoList $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
-
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -87,11 +88,11 @@ class TodoListController extends BaseController
         if ($validator->fails()) {
             return $this->sendError('Ошибка валидации', $validator->errors());
         }
-        $list->name = $input['name'];
-        if (!in_array($input['list_id'], (new TodoList)->getListOfListsIds())) {
-            return $this->sendError('Список с id не принадлежит пользователю');
-        }
-        $list->list_id = $input['list_id'];
+        $list->fill([
+            'name' => $input['name'],
+            'list_id' => $input['list_id'],
+        ]);
+        $this->authorize('update', $list);
         $list->save();
 
         return $this->sendResponse($list->toArray(), 'Список успешно обновлен');
@@ -106,15 +107,11 @@ class TodoListController extends BaseController
      */
     public function destroy(TodoList $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
-
+        $this->authorize('delete', $list);
         $todoItems = $list->items()->get();
         foreach ($todoItems as $todoItem) {
             $todoItem->delete();
         }
-
         $list->delete();
 
         return $this->sendResponse($list->toArray(), 'Список успешно удален');

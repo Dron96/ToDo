@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\ListOfLists;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,12 +55,11 @@ class ListOfListsController extends BaseController
      * @param ListOfLists $list
      *
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function show(ListOfLists $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
+        $this->authorize('view', $list);
         $lists = $list->todoLists;
 
         return $this->sendResponse(['list' => $lists->toArray()], 'Список списков получен');
@@ -72,13 +72,11 @@ class ListOfListsController extends BaseController
      * @param Request $request
      * @param ListOfLists $list
      * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function update(Request $request, ListOfLists $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
-
+        $this->authorize('update', $list);
         $input = $request->all();
         $validator = Validator::make($input, [
             'name' => 'required|min:5|max:255',
@@ -97,14 +95,12 @@ class ListOfListsController extends BaseController
      *
      * @param ListOfLists $list
      * @return JsonResponse
+     * @throws AuthorizationException
      * @throws Exception
      */
     public function destroy(ListOfLists $list)
     {
-        if (!$list->isOwn()) {
-            return $this->sendError('Список не принадлежит данному пользователю');
-        }
-
+        $this->authorize('delete', $list);
         $todoLists = $list->todoLists()->get();
         foreach ($todoLists as $todoList) {
             $todoItems = $todoList->items()->get();
